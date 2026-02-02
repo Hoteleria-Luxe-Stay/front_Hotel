@@ -1,0 +1,411 @@
+<div class="min-h-screen py-10">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 page-enter">
+
+    <!-- Título -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-semibold text-white mb-2">Mis Reservas</h1>
+      <p class="text-slate-300">Consulta, edita o cancela tus reservas</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="surface-card rounded-2xl p-6 mb-6">
+      <h3 class="text-sm font-semibold text-slate-200 mb-4">Filtrar reservas</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Fecha inicio -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Fecha desde</label>
+          <input type="date" 
+            [value]="filtroFechaInicio()" 
+            (change)="onFiltroFechaInicioChange($event)"
+            class="w-full px-3 py-2 text-sm border border-slate-600 rounded-lg bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+        </div>
+        
+        <!-- Fecha fin -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Fecha hasta</label>
+          <input type="date" 
+            [value]="filtroFechaFin()" 
+            (change)="onFiltroFechaFinChange($event)"
+            class="w-full px-3 py-2 text-sm border border-slate-600 rounded-lg bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Estado</label>
+          <select 
+            [value]="filtroEstado()" 
+            (change)="onFiltroEstadoChange($event)"
+            class="w-full px-3 py-2 text-sm border border-slate-600 rounded-lg bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+            <option value="TODOS">Todos</option>
+            <option value="CONFIRMADA">Confirmada</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="CANCELADA">Cancelada</option>
+          </select>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex items-end gap-2">
+          <button (click)="buscarConFiltros()" 
+            class="flex-1 px-4 py-2 btn-primary text-sm">
+            Buscar
+          </button>
+          <button (click)="limpiarFiltros()" 
+            class="px-4 py-2 btn-outline text-sm">
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensajes de estado -->
+    @if (error()) {
+    <div class="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex items-center gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 flex-shrink-0" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p class="text-red-200">{{ error() }}</p>
+    </div>
+    }
+
+    @if (successMessage()) {
+    <div class="mb-6 bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 flex items-center gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 flex-shrink-0" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <p class="text-emerald-200">{{ successMessage() }}</p>
+    </div>
+    }
+
+    <!-- Loading -->
+    @if (loading()) {
+    <div class="surface-card rounded-2xl p-12 text-center">
+      <svg class="animate-spin h-12 w-12 mx-auto text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+      <p class="text-slate-300">Cargando tus reservas...</p>
+    </div>
+    }
+
+    <!-- Contenido principal -->
+    @if (!loading()) {
+      @if (reservasFiltradas().length > 0) {
+      <!-- Header de resultados -->
+      <div class="flex justify-between items-center mb-4">
+        <p class="text-slate-300">
+          Mostrando <span class="font-semibold text-white">{{ reservasFiltradas().length }}</span> de 
+          <span class="font-semibold text-white">{{ reservas().length }}</span> reserva(s)
+        </p>
+        <button (click)="cargarReservas()" class="text-amber-300 hover:text-amber-200 text-sm font-medium flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Actualizar
+        </button>
+      </div>
+
+      <!-- Lista de reservas -->
+      <div class="space-y-4">
+        @for (reserva of reservasFiltradas(); track reserva.id) {
+        <div class="surface-card rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+          <!-- Header de la reserva -->
+          <div class="p-4 sm:p-5 border-b border-slate-700/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-amber-400/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <div>
+                 <p class="text-xs text-slate-400">Reserva</p>
+                 <p class="text-lg font-bold text-white">#{{ reserva.id }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 text-xs font-medium rounded-full" [ngClass]="getEstadoClass(reserva.estado)">
+                {{ reserva.estado }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Contenido de la reserva -->
+            <div class="p-4 sm:p-5">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <!-- Hotel -->
+              <div>
+                <p class="text-xs text-slate-400 mb-1">Hotel</p>
+                <p class="font-medium text-slate-100 text-sm">{{ reserva.hotelNombre }}</p>
+              </div>
+
+              <!-- Fechas -->
+              <div>
+                <p class="text-xs text-slate-400 mb-1">Check-in / Check-out</p>
+                <p class="font-medium text-slate-100 text-sm">
+                  {{ formatDate(reserva.fechaInicio) }} - {{ formatDate(reserva.fechaFin) }}
+                </p>
+                <p class="text-xs text-slate-400">
+                  {{ calcularNoches(reserva.fechaInicio, reserva.fechaFin) }} noche(s)
+                </p>
+              </div>
+
+              <!-- Habitaciones -->
+              <div>
+                <p class="text-xs text-slate-400 mb-1">Habitaciones</p>
+                <p class="font-medium text-slate-100 text-sm">{{ reserva.cantidadHabitaciones }}</p>
+              </div>
+
+              <!-- Total -->
+              <div>
+                <p class="text-xs text-slate-400 mb-1">Total</p>
+                <p class="text-lg font-bold text-emerald-300">{{ formatCurrency(reserva.total) }}</p>
+              </div>
+            </div>
+
+            @if (reserva.estado === 'CANCELADA') {
+            <div class="bg-red-50 border border-red-100 rounded-lg p-3 mb-4 text-sm text-red-700">
+              <p>Fecha de cancelación: <span class="font-medium">{{ reserva.fechaCancelacion ? formatDate(reserva.fechaCancelacion) : 'No disponible' }}</span></p>
+              <p>Motivo: <span class="font-medium">{{ reserva.motivoCancelacion || 'No disponible' }}</span></p>
+            </div>
+            }
+
+            <!-- Acciones -->
+            <div class="pt-4 border-t border-slate-700/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <p class="text-xs text-slate-400">
+                Inicio de estadía: {{ formatDateLong(reserva.fechaInicio) }}
+              </p>
+              <div class="flex items-center gap-2">
+                <!-- Ir a pagar (solo si está PENDIENTE) -->
+                @if (reserva.estado === 'PENDIENTE') {
+                <a [routerLink]="['/home/reserva', reserva.id, 'pago']"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-emerald-500 text-slate-900 hover:bg-emerald-400 rounded-lg transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  Pagar
+                </a>
+                }
+
+                <!-- Ver detalles -->
+                <a [routerLink]="['/home/reserva', reserva.id, 'confirmacion']"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-amber-200 hover:text-amber-100 hover:bg-amber-400/10 rounded-lg transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  Ver
+                </a>
+
+                <!-- Editar (solo si está CONFIRMADA) -->
+                @if (reserva.estado === 'CONFIRMADA') {
+                <button (click)="abrirModalEditar(reserva)"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-amber-200 hover:text-amber-100 hover:bg-amber-400/10 rounded-lg transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Editar
+                </button>
+                }
+
+                <!-- Cancelar (CONFIRMADA o PENDIENTE) -->
+                @if (reserva.estado === 'CONFIRMADA' || reserva.estado === 'PENDIENTE') {
+                <button (click)="abrirModalEliminar(reserva)"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-red-300 hover:text-red-200 hover:bg-red-500/10 rounded-lg transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Cancelar
+                </button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+      } @else if (reservas().length > 0) {
+      <!-- No hay resultados con los filtros aplicados -->
+       <div class="surface-card rounded-2xl p-12 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300 mb-4" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+         <h3 class="text-xl font-semibold text-slate-100 mb-2">Sin resultados</h3>
+         <p class="text-slate-300 mb-6">
+          No se encontraron reservas con los filtros aplicados.
+        </p>
+         <button (click)="limpiarFiltros()"
+           class="inline-flex items-center gap-2 px-6 py-3 btn-primary">
+          Limpiar filtros
+        </button>
+      </div>
+      } @else {
+      <!-- Sin reservas -->
+       <div class="surface-card rounded-2xl p-12 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300 mb-4" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+         <h3 class="text-xl font-semibold text-slate-100 mb-2">No tienes reservas</h3>
+         <p class="text-slate-300 mb-6">
+          Aún no has realizado ninguna reserva. ¡Explora nuestros hoteles y haz tu primera reserva!
+        </p>
+         <a [routerLink]="['/home/departamentos']"
+           class="inline-flex items-center gap-2 px-6 py-3 btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Explorar hoteles
+        </a>
+      </div>
+      }
+    }
+
+    <!-- Link volver -->
+    <div class="mt-8">
+       <a [routerLink]="['/home']"
+        class="inline-flex items-center gap-2 text-amber-200 hover:text-amber-100 font-medium transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Volver al inicio
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal Confirmar Eliminación -->
+@if (showModalEliminar()) {
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="surface-strong rounded-xl shadow-xl max-w-md w-full p-6">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-semibold text-white mb-2">¿Cancelar reserva?</h3>
+      <p class="text-slate-300">
+        ¿Estás seguro de cancelar la reserva <span class="font-semibold">#{{ reservaSeleccionada()?.id }}</span>?
+        Esta acción no se puede deshacer.
+      </p>
+    </div>
+    <div class="flex gap-3">
+      <button (click)="cerrarModalEliminar()"
+        class="flex-1 px-4 py-2.5 border border-slate-600 text-slate-200 rounded-lg hover:bg-white/10 transition font-medium">
+        No, mantener
+      </button>
+      <button (click)="confirmarEliminar()" [disabled]="procesando()"
+        class="flex-1 px-4 py-2.5 bg-red-500 text-slate-900 rounded-lg hover:bg-red-400 transition font-medium disabled:opacity-50">
+        @if (procesando()) {
+        Cancelando...
+        } @else {
+        Sí, cancelar
+        }
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal Editar Reserva -->
+@if (showModalEditar()) {
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+  <div class="surface-strong rounded-xl shadow-xl max-w-lg w-full p-6 my-8">
+    <div class="flex items-center justify-between mb-6">
+    <h3 class="text-xl font-semibold text-white">Editar Reserva #{{ reservaSeleccionada()?.id }}</h3>
+      <button (click)="cerrarModalEditar()" class="text-gray-400 hover:text-gray-600">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <!-- Info del hotel (solo lectura) -->
+      <div class="bg-white/5 rounded-lg p-4 border border-slate-700">
+        <p class="text-sm text-slate-400 mb-1">Hotel</p>
+        <p class="font-medium text-slate-100">{{ reservaSeleccionada()?.hotel?.nombre }}</p>
+      </div>
+
+      <!-- Aviso de 24 horas -->
+      <div class="bg-amber-400/10 border border-amber-400/30 rounded-lg p-3 flex items-start gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-sm text-amber-200">Las reservas deben realizarse con al menos 24 horas de anticipación.</p>
+      </div>
+
+      <!-- Fechas editables -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-200 mb-1">Fecha de entrada</label>
+          <input type="date" 
+            [value]="editFechaInicio()" 
+            [min]="getMinDate()"
+            (change)="onEditFechaInicioChange($event)"
+            class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-200 mb-1">Fecha de salida</label>
+          <input type="date" 
+            [value]="editFechaFin()" 
+            [min]="editFechaInicio()"
+            (change)="onEditFechaFinChange($event)"
+            class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50">
+        </div>
+      </div>
+
+      <!-- Noches calculadas -->
+      <div class="text-sm text-slate-300">
+        Duración: <span class="font-medium text-slate-100">{{ calcularNochesEdit() }} noche(s)</span>
+      </div>
+
+      <!-- Error de edición -->
+      @if (editError()) {
+      <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 flex-shrink-0" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-red-200 text-sm">{{ editError() }}</p>
+      </div>
+      }
+    </div>
+
+    <div class="flex gap-3 mt-6">
+    <button (click)="cerrarModalEditar()"
+        class="flex-1 px-4 py-2.5 border border-slate-600 text-slate-200 rounded-lg hover:bg-white/10 transition font-medium">
+        Cancelar
+      </button>
+    <button (click)="confirmarEditar()" [disabled]="procesando()"
+        class="flex-1 px-4 py-2.5 bg-amber-500 text-slate-900 rounded-lg hover:bg-amber-400 transition font-medium disabled:opacity-50">
+        @if (procesando()) {
+        Guardando...
+        } @else {
+        Guardar cambios
+        }
+      </button>
+    </div>
+  </div>
+</div>
+}

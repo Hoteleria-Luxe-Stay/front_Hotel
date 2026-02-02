@@ -1,0 +1,257 @@
+<div class="p-8">
+  <div class="max-w-4xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800">Reserva Nro {{ reservaId() }}</h1>
+        @if (reserva()) {
+        <p class="text-gray-500 mt-1">Dirección del hotel: {{ reserva()?.hotel?.direccion || 'Sin dirección' }}</p>
+        }
+      </div>
+      <button [routerLink]="['/admin/reserva/list']"
+        class="px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all">
+        Volver
+      </button>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-12">
+      <div class="flex justify-center items-center gap-2 text-gray-500">
+        <svg class="animate-spin h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+        </svg>
+        <span class="text-lg">Cargando datos de la reserva...</span>
+      </div>
+    </div>
+    }
+
+    <!-- Formulario -->
+    @else {
+    <form (ngSubmit)="onSubmit()" [formGroup]="reservaForm" class="space-y-6">
+
+      <!-- Sección: Ubicación -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+          Ubicación
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Departamento -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+            <select formControlName="departamentoId" (change)="onDepartamentoChange($event)"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+              <option value="">Seleccione departamento</option>
+              @for (dep of departamentos(); track dep.id) {
+              <option [value]="dep.id">{{ dep.nombre }}</option>
+              }
+            </select>
+          </div>
+          <!-- Hotel -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
+            <select formControlName="hotelId" (change)="onHotelChange($event)"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+              <option value="">Seleccione hotel</option>
+              @for (hotel of hotelesFiltrados(); track hotel.id) {
+              <option [value]="hotel.id">{{ hotel.nombre }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Datos del Cliente -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+          Datos del Cliente
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Nombre -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+            <input type="text" formControlName="clienteNombre"
+              class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+              [class.border-red-500]="clienteNombreInvalid" [class.border-gray-300]="!clienteNombreInvalid">
+          </div>
+
+          <!-- Apellido -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+            <input type="text" formControlName="clienteApellido"
+              class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+              [class.border-red-500]="clienteApellidoInvalid" [class.border-gray-300]="!clienteApellidoInvalid">
+          </div>
+
+          <!-- DNI -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">DNI</label>
+            <input type="text" formControlName="clienteDni" maxlength="8"
+              class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+              [class.border-red-500]="clienteDniInvalid" [class.border-gray-300]="!clienteDniInvalid">
+          </div>
+
+          <!-- Correo -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
+            <input type="email" formControlName="clienteCorreo"
+              class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+              [class.border-red-500]="clienteCorreoInvalid" [class.border-gray-300]="!clienteCorreoInvalid">
+          </div>
+
+          <!-- Teléfono -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+            <input type="text" formControlName="clienteTelefono" maxlength="9"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Fechas de la Reserva -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+          Fechas de la Reserva
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Fecha Entrada -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Entrada</label>
+            <input type="date" formControlName="fechaInicio"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+          </div>
+
+          <!-- Fecha Salida -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Salida</label>
+            <input type="date" formControlName="fechaFin"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Seleccionar habitaciones -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+          Seleccionar habitaciones
+        </h3>
+
+        @if (habitacionesDisponibles().length > 0) {
+        @for (sel of habitacionesSeleccionadas(); track sel.index) {
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Habitación {{ sel.index }}</label>
+          <div class="flex items-center gap-2">
+            <select [value]="sel.habitacionId || ''" (change)="onHabitacionChange(sel.index, $event)"
+              class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+              <option value="">-- Seleccionar --</option>
+              @for (hab of getHabitacionesParaSelect(sel.index); track hab.id) {
+              <option [value]="hab.id" [selected]="hab.id === sel.habitacionId">
+                {{ hab.tipoHabitacion?.nombre || 'Habitación' }} - S/ {{ hab.precio?.toFixed(2) }}
+              </option>
+              }
+            </select>
+            @if (habitacionesSeleccionadas().length > 1) {
+            <button type="button" (click)="quitarHabitacion(sel.index)"
+              class="px-4 py-2.5 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition">
+              Quitar
+            </button>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Botón Añadir habitación -->
+        @if (getHabitacionesParaSelect(0).length > habitacionesSeleccionadas().length) {
+        <button type="button" (click)="agregarHabitacion()"
+          class="px-4 py-2 border border-indigo-500 text-indigo-600 font-medium rounded-lg hover:bg-indigo-50 transition">
+          Añadir habitación
+        </button>
+        }
+
+        <!-- Total -->
+        <div class="mt-6 pt-4 border-t border-gray-200">
+          <p class="text-lg font-bold text-gray-800">
+            Total: <span class="text-indigo-600">{{ formatCurrency(calcularTotal()) }}</span>
+          </p>
+        </div>
+        } @else {
+        <p class="text-gray-500 py-4">Seleccione un hotel para ver las habitaciones disponibles</p>
+        }
+      </div>
+
+      <!-- Sección: Estado -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+          Estado de la Reserva
+        </h3>
+        <div class="max-w-xs">
+          <select formControlName="estado"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            @for (estado of estados; track estado.value) {
+            <option [value]="estado.value">{{ estado.label }}</option>
+            }
+          </select>
+        </div>
+
+        @if (reservaForm.get('estado')?.value === 'CANCELADA') {
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Motivo de cancelación</label>
+          <textarea formControlName="motivoCancelacion" rows="3"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+            placeholder="Indique el motivo de la cancelación"></textarea>
+        </div>
+        }
+
+        @if (reserva()?.estado === 'CANCELADA') {
+        <div class="mt-4 text-sm text-gray-600">
+          <p>Fecha de cancelación: <span class="font-medium text-gray-800">{{ formatDate(reserva()?.fechaCancelacion) }}</span></p>
+          <p>Motivo registrado: <span class="font-medium text-gray-800">{{ reserva()?.motivoCancelacion || 'No disponible' }}</span></p>
+        </div>
+        }
+      </div>
+
+      <!-- Error -->
+      @if (errorMessage()) {
+      <div class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="text-red-700">{{ errorMessage() }}</span>
+      </div>
+      }
+
+      <!-- Botones -->
+      <div class="flex gap-4">
+        <button type="submit" [disabled]="saving()"
+          class="flex-1 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          @if (saving()) {
+          <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+          </svg>
+          Guardando...
+          } @else {
+          Actualizar Reserva
+          }
+        </button>
+        <button type="button" [routerLink]="['/admin/reserva/list']"
+          class="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-300 transition">
+          Cancelar
+        </button>
+      </div>
+
+    </form>
+    }
+
+  </div>
+</div>

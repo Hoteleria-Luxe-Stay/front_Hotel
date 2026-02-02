@@ -1,0 +1,84 @@
+<div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
+  <h1 class="text-3xl font-bold mb-6">Editar Hotel</h1>
+
+  @if (error()) {
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ error() }}
+    </div>
+  }
+
+
+  @if (loading()) {
+    <div class="text-center py-8">
+      <p class="text-gray-600">Cargando datos...</p>
+    </div>
+  } @else {
+    <form [formGroup]="hotelForm" (ngSubmit)="onSubmit()">
+
+
+      <div class="mb-4">
+        <label class="block text-gray-700 font-semibold">Nombre: *</label>
+        <input
+          type="text"
+          formControlName="nombre"
+          class="w-full border rounded p-2 mt-1"
+          [class.border-red-500]="hotelForm.get('nombre')?.invalid && hotelForm.get('nombre')?.touched"
+          placeholder="Nombre del hotel"
+        >
+        @if (hotelForm.get('nombre')?.invalid && hotelForm.get('nombre')?.touched) {
+          <span class="text-red-500 text-sm">
+            El nombre es requerido
+          </span>
+        }
+      </div>
+
+      <!-- Dirección -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-semibold">Dirección: *</label>
+        <input
+          type="text"
+          formControlName="direccion"
+          class="w-full border rounded p-2 mt-1"
+          [class.border-red-500]="hotelForm.get('direccion')?.invalid && hotelForm.get('direccion')?.touched"
+        >
+        @if (hotelForm.get('direccion')?.invalid && hotelForm.get('direccion')?.touched) {
+          <span class="text-red-500 text-sm">
+            La dirección es requerida
+          </span>
+        }
+      </div>
+
+      <!-- Departamento -->
+      <div class="mb-6">
+        <label class="block text-gray-700 font-semibold">Departamento: *</label>
+        <select
+          formControlName="departamento"
+          class="w-full border rounded p-2 mt-1"
+          [class.border-red-500]="hotelForm.get('departamento')?.invalid && hotelForm.get('departamento')?.touched"
+        >
+          <option value="">Selecciona un departamento</option>
+          @for (d of departamentos(); track d.id) {
+            <option [value]="d.id">
+              {{ d.nombre }}
+            </option>
+          }
+        </select>
+        @if (hotelForm.get('departamento')?.invalid && hotelForm.get('departamento')?.touched) {
+          <span class="text-red-500 text-sm">
+            El departamento es requerido
+          </span>
+        }
+      </div>
+
+      <!-- Guardar -->
+      <button
+        type="submit"
+        [disabled]="hotelForm.invalid"
+        class="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+      >
+        💾 Guardar Hotel
+      </button>
+
+    </form>
+  }
+</div>

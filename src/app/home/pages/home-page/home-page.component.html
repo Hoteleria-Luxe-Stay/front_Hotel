@@ -1,0 +1,213 @@
+<div class="min-h-screen page-enter">
+
+  <!-- Hero Carousel Section -->
+  <section class="relative h-[500px] md:h-[550px] overflow-hidden">
+    <!-- Slide Images -->
+    <div class="absolute inset-0">
+      @switch (currentSlide()) {
+        @case (0) {
+          <img 
+            src="https://images.unsplash.com/photo-1526392060635-9d6019884377?w=1600" 
+            alt="Machu Picchu" 
+            class="w-full h-full object-cover"
+          />
+        }
+        @case (1) {
+          <img 
+            src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1600" 
+            alt="Hotel de Lujo" 
+            class="w-full h-full object-cover"
+          />
+        }
+        @case (2) {
+          <img 
+            src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1600" 
+            alt="Suite Premium" 
+            class="w-full h-full object-cover"
+          />
+        }
+      }
+    </div>
+    
+    <!-- Overlay gradient -->
+    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-slate-900/50"></div>
+    
+    <!-- Navigation Arrows -->
+    <button 
+      (click)="prevSlide()" 
+      class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <button 
+      (click)="nextSlide()" 
+      class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+    
+    <!-- Slide Content -->
+    <div class="absolute inset-0 flex items-center justify-center">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-5xl font-serif text-white tracking-wide">
+          @switch (currentSlide()) {
+            @case (0) { Experiencia de Lujo }
+            @case (1) { Confort Premium }
+            @case (2) { Momentos Inolvidables }
+          }
+        </h1>
+      </div>
+    </div>
+    
+    <!-- Slide Indicators -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+      @for (slide of [0, 1, 2]; track slide) {
+        <button 
+          (click)="goToSlide(slide)"
+          class="w-8 h-1 rounded-full transition-colors"
+          [class.bg-amber-400]="currentSlide() === slide"
+          [class.bg-white/40]="currentSlide() !== slide">
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Misión, Visión, Valores -->
+  <section class="py-16 px-4">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- Misión -->
+      <div class="bg-slate-800/50 border border-amber-400/30 rounded-2xl p-8 text-center hover:border-amber-400/60 transition-colors">
+        <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+          <svg class="w-12 h-12 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-serif text-amber-400 mb-4 underline underline-offset-4">Misión</h3>
+        <p class="text-gray-300 text-sm leading-relaxed">
+          Brindar experiencias de hospitalidad excepcionales que superen las expectativas de nuestros huéspedes, ofreciendo comodidad, elegancia y un servicio personalizado de clase mundial.
+        </p>
+      </div>
+
+      <!-- Visión -->
+      <div class="bg-slate-800/50 border border-amber-400/30 rounded-2xl p-8 text-center hover:border-amber-400/60 transition-colors">
+        <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+          <svg class="w-12 h-12 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-serif text-amber-400 mb-4 underline underline-offset-4">Visión</h3>
+        <p class="text-gray-300 text-sm leading-relaxed">
+          Ser reconocidos como la plataforma de reservas hoteleras líder en la región, estableciendo nuevos estándares de excelencia en la industria de la hospitalidad y el turismo.
+        </p>
+      </div>
+
+      <!-- Valores -->
+      <div class="bg-slate-800/50 border border-amber-400/30 rounded-2xl p-8 text-center hover:border-amber-400/60 transition-colors">
+        <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+          <svg class="w-12 h-12 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8l-2 6h4l-2 6 6-8h-4l2-6-6 8h4z"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-serif text-amber-400 mb-4 underline underline-offset-4">Valores</h3>
+        <p class="text-gray-300 text-sm leading-relaxed">
+          Excelencia en el servicio, integridad en cada interacción, innovación constante y compromiso inquebrantable con la satisfacción y bienestar de nuestros clientes.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Galería de Experiencias -->
+  <section class="py-12 px-4">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-serif text-amber-400 text-center mb-12 italic">
+        Galería de Experiencias
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Imagen 1 -->
+        <div class="relative group overflow-hidden rounded-xl aspect-[4/3]">
+          <img 
+            src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600" 
+            alt="Piscina familiar"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </div>
+        
+        <!-- Imagen 2 -->
+        <div class="relative group overflow-hidden rounded-xl aspect-[4/3]">
+          <img 
+            src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600" 
+            alt="Tour cultural"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </div>
+        
+        <!-- Imagen 3 -->
+        <div class="relative group overflow-hidden rounded-xl aspect-[4/3]">
+          <img 
+            src="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600" 
+            alt="Resort con piscina"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </div>
+        
+        <!-- Imagen 4 -->
+        <div class="relative group overflow-hidden rounded-xl aspect-[4/3]">
+          <img 
+            src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600" 
+            alt="Patio colonial"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </div>
+        
+        <!-- Imagen 5 -->
+        <div class="relative group overflow-hidden rounded-xl aspect-[4/3]">
+          <img 
+            src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600" 
+            alt="Desayuno gourmet"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </div>
+        
+        <!-- Imagen 6 -->
+        <div class="relative group overflow-hidden rounded-xl aspect-[4/3]">
+          <img 
+            src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=600" 
+            alt="Hotel nocturno"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Reservar -->
+  <section class="py-16 px-4">
+    <div class="max-w-6xl mx-auto text-center">
+      <a 
+        routerLink="/home/departamentos"
+        class="inline-flex items-center gap-3 px-10 py-4 btn-primary rounded-full group">
+        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <span class="text-lg">RESERVAR AHORA</span>
+      </a>
+      
+      <p class="mt-6 text-amber-400 text-sm">
+        ⭐ Reserva con confianza • Cancelación flexible • Mejor precio garantizado
+      </p>
+    </div>
+  </section>
+
+</div>

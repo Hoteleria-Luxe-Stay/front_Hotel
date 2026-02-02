@@ -1,0 +1,91 @@
+<div class="p-8">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-3xl font-semibold text-slate-100">Habitaciones</h1>
+        <p class="text-sm text-slate-400">Hotel: {{ hotel()?.nombre || 'Cargando...' }}</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button [routerLink]="['/admin/hotel/departamento', hotelId()]"
+          class="px-4 py-2 text-sm text-slate-200 border border-slate-600 rounded-lg hover:bg-white/5 transition">
+          Volver a hoteles
+        </button>
+        <button [routerLink]="['/admin/habitacion/crear', hotelId()]"
+          class="px-4 py-2 btn-primary text-sm">
+          Nueva habitación
+        </button>
+      </div>
+    </div>
+
+    @if (error()) {
+    <div class="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-200">
+      {{ error() }}
+    </div>
+    }
+
+    <div class="surface-card rounded-2xl overflow-hidden">
+      @if (loading()) {
+      <div class="p-10 text-center text-slate-300">Cargando habitaciones...</div>
+      } @else if (habitaciones().length > 0) {
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-700">
+          <thead class="bg-slate-900/70 text-slate-300">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">ID</th>
+              <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">Número</th>
+              <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">Tipo</th>
+              <th class="px-4 py-3 text-center text-xs uppercase tracking-wider">Capacidad</th>
+              <th class="px-4 py-3 text-center text-xs uppercase tracking-wider">Precio</th>
+              <th class="px-4 py-3 text-center text-xs uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800">
+            @for (habitacion of habitaciones(); track habitacion.id) {
+            <tr class="hover:bg-white/5">
+              <td class="px-4 py-3 text-sm text-slate-200">#{{ habitacion.id }}</td>
+              <td class="px-4 py-3 text-sm text-slate-100">{{ habitacion.numero }}</td>
+              <td class="px-4 py-3 text-sm text-slate-300">{{ habitacion.tipoHabitacion?.nombre || 'N/D' }}</td>
+              <td class="px-4 py-3 text-sm text-center text-slate-200">{{ habitacion.capacidad }}</td>
+              <td class="px-4 py-3 text-sm text-center text-emerald-300">S/ {{ habitacion.precio.toFixed(2) }}</td>
+              <td class="px-4 py-3 text-center">
+                <div class="flex items-center justify-center gap-2">
+                  <button [routerLink]="['/admin/habitacion/editar', habitacion.id]"
+                    class="px-3 py-1.5 text-sm text-amber-200 border border-amber-400/40 rounded-lg hover:bg-amber-400/10">
+                    Editar
+                  </button>
+                  <button (click)="abrirModalEliminar(habitacion)"
+                    class="px-3 py-1.5 text-sm text-red-200 border border-red-500/40 rounded-lg hover:bg-red-500/10">
+                    Eliminar
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      } @else {
+      <div class="p-10 text-center text-slate-300">No hay habitaciones registradas.</div>
+      }
+    </div>
+  </div>
+</div>
+
+@if (showModalEliminar()) {
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="surface-strong rounded-xl shadow-xl max-w-md w-full p-6">
+    <h3 class="text-xl font-semibold text-white mb-2">¿Eliminar habitación?</h3>
+    <p class="text-slate-300 mb-6">Se eliminará la habitación #{{ habitacionSeleccionada()?.numero }}.</p>
+    <div class="flex gap-3">
+      <button (click)="cerrarModalEliminar()"
+        class="flex-1 px-4 py-2 border border-slate-600 text-slate-200 rounded-lg hover:bg-white/10">
+        Cancelar
+      </button>
+      <button (click)="confirmarEliminar()" [disabled]="procesando()"
+        class="flex-1 px-4 py-2 bg-red-500 text-slate-900 rounded-lg hover:bg-red-400">
+        @if (procesando()) { Eliminando... } @else { Eliminar }
+      </button>
+    </div>
+  </div>
+</div>
+}

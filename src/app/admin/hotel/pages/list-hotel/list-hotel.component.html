@@ -1,0 +1,188 @@
+<div class="p-8">
+  <div class="max-w-6xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">
+        Hoteles en {{ departamento()?.nombre || 'Cargando...' }}
+      </h1>
+    </div>
+
+    <!-- Mensaje de éxito -->
+    @if (successMessage()) {
+    <div class="mb-4 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+      <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <span class="text-green-800">{{ successMessage() }}</span>
+      <button (click)="successMessage.set(null)" class="ml-auto text-green-600 hover:text-green-800">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    }
+
+    <!-- Tabla de hoteles -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+
+      @if (loading()) {
+      <div class="p-12 text-center">
+        <div class="flex justify-center items-center gap-2 text-gray-500">
+          <svg class="animate-spin h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+          </svg>
+          <span class="text-lg">Cargando hoteles...</span>
+        </div>
+      </div>
+      }
+
+      @else if (hoteles().length > 0) {
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <!-- Cabecera -->
+          <thead class="bg-gray-800 text-white">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">
+                Nombre
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">
+                Dirección
+              </th>
+              <th class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider">
+                Habitaciones
+              </th>
+              <th class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider">
+                Opciones
+              </th>
+            </tr>
+          </thead>
+
+          <!-- Cuerpo -->
+          <tbody class="divide-y divide-gray-100 bg-white">
+            @for (hotel of hoteles(); track hotel.id) {
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 text-sm font-medium text-gray-800">
+                {{ hotel.nombre }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-600">
+                {{ hotel.direccion || 'Sin dirección' }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700 text-center">
+                {{ getCantidadHabitaciones() }}
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex justify-center gap-2">
+                  <button [routerLink]="['/admin/habitacion/hotel', hotel.id]"
+                    class="p-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition" title="Habitaciones">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                  <button [routerLink]="['/admin/hotel/editar', hotel.id]"
+                    class="p-2 bg-indigo-100 text-indigo-600 rounded-lg hover:bg-indigo-200 transition" title="Editar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button (click)="abrirModalEliminar(hotel)"
+                    class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition" title="Eliminar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+
+      @else {
+      <div class="p-12 text-center text-gray-500">
+        <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        <p class="text-lg font-semibold">No hay hoteles registrados</p>
+        <p class="text-sm mt-1">Este departamento aún no tiene hoteles</p>
+      </div>
+      }
+
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="flex justify-between items-center mt-6">
+      <button [routerLink]="['/admin/hotel/list']"
+        class="px-5 py-2.5 bg-gray-700 text-white font-medium rounded-lg hover:bg-gray-800 transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Volver
+      </button>
+
+      <button [routerLink]="['/admin/hotel/crear']" [queryParams]="{departamentoId: departamentoId()}"
+        class="px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Nuevo hotel
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal Confirmar Eliminación -->
+@if (showModalEliminar()) {
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 overflow-hidden">
+    <!-- Header del modal -->
+    <div class="p-6 text-center">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">¿Eliminar Hotel?</h3>
+      <p class="text-gray-600">
+        Está a punto de eliminar el hotel <strong>"{{ hotelSeleccionado()?.nombre }}"</strong>.
+      </p>
+      <p class="text-sm text-red-600 mt-2">Esta acción no se puede deshacer y eliminará todas las habitaciones
+        asociadas.</p>
+    </div>
+
+    <!-- Botones -->
+    <div class="flex gap-3 p-4 bg-gray-50 border-t border-gray-200">
+      <button (click)="cerrarModalEliminar()" [disabled]="procesando()"
+        class="flex-1 px-4 py-2.5 bg-gray-200 text-gray-800 font-medium rounded-xl hover:bg-gray-300 transition disabled:opacity-50">
+        Cancelar
+      </button>
+      <button (click)="confirmarEliminar()" [disabled]="procesando()"
+        class="flex-1 px-4 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition disabled:opacity-50 flex items-center justify-center gap-2">
+        @if (procesando()) {
+        <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+        </svg>
+        Eliminando...
+        } @else {
+        Sí, eliminar
+        }
+      </button>
+    </div>
+  </div>
+</div>
+}

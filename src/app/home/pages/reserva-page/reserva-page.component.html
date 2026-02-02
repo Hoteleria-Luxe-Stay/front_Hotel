@@ -1,0 +1,241 @@
+<div class="min-h-screen py-10">
+  <div class="max-w-4xl mx-auto px-4 page-enter">
+
+    <!-- Loading -->
+    @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="flex items-center gap-3 text-slate-300">
+        <svg class="animate-spin h-8 w-8 text-amber-300" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+        </svg>
+        <span class="text-xl">Cargando información del hotel...</span>
+      </div>
+    </div>
+    }
+
+    @if (!loading() && hotelData()) {
+    <!-- Título -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-serif text-white">
+        Reservar en {{ hotelData()?.nombre }}
+      </h1>
+    </div>
+
+    <!-- Dirección -->
+    <div class="mb-6">
+      <p class="text-slate-400 font-medium">Dirección:</p>
+      <p class="text-slate-100">{{ hotelData()?.direccion }}</p>
+    </div>
+
+    <!-- Mensaje de error -->
+    @if (errorMessage()) {
+    <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6 flex items-center gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24"
+        stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p class="text-red-200">{{ errorMessage() }}</p>
+    </div>
+    }
+
+    <!-- Sección: Datos del Cliente -->
+    <div class="surface-card rounded-2xl mb-6">
+      <div class="px-4 py-3 border-b border-slate-700">
+        <h2 class="text-lg font-medium text-white">Datos del Cliente</h2>
+      </div>
+      <div class="p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Nombre completo -->
+          <div>
+            <label class="block text-sm text-slate-300 mb-1">Nombre completo</label>
+            <input type="text" [formControl]="clienteForm.controls.nombreCompleto"
+              class="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+              [class.border-red-500]="nombreCompletoInvalid" [class.border-gray-300]="!nombreCompletoInvalid"
+              placeholder="Juan Pérez" />
+            @if (nombreCompletoInvalid) {
+            <p class="mt-1 text-sm text-red-300">Nombre requerido</p>
+            }
+          </div>
+
+          <!-- DNI -->
+          <div>
+            <label class="block text-sm text-slate-300 mb-1">DNI</label>
+            <input type="text" [formControl]="clienteForm.controls.dni" maxlength="8"
+              class="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+              [class.border-red-500]="dniInvalid" [class.border-gray-300]="!dniInvalid" placeholder="12345678" />
+            @if (dniInvalid) {
+            <p class="mt-1 text-sm text-red-300">DNI inválido (8 dígitos)</p>
+            }
+          </div>
+
+          <!-- Correo electrónico -->
+          <div>
+            <label class="block text-sm text-slate-300 mb-1">Correo electrónico</label>
+            <input type="email" [formControl]="clienteForm.controls.correo"
+              class="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+              [class.border-red-500]="correoInvalid" [class.border-gray-300]="!correoInvalid"
+              placeholder="correo@ejemplo.com" />
+            @if (correoInvalid) {
+            <p class="mt-1 text-sm text-red-300">Correo inválido</p>
+            }
+          </div>
+
+          <!-- Teléfono -->
+          <div>
+            <label class="block text-sm text-slate-300 mb-1">Teléfono</label>
+            <input type="text" [formControl]="clienteForm.controls.telefono" maxlength="9"
+              class="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+              [class.border-red-500]="telefonoInvalid" placeholder="987654321" />
+            @if (telefonoInvalid) {
+            <p class="mt-1 text-sm text-red-300">Teléfono inválido</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección: Fechas de la Reserva -->
+    <div class="surface-card rounded-2xl mb-6">
+      <div class="px-4 py-3 border-b border-slate-700">
+        <h2 class="text-lg font-medium text-white">Fechas de la Reserva</h2>
+      </div>
+      <div class="p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Fecha de Entrada -->
+          <div>
+            <label class="block text-sm text-slate-300 mb-1">Fecha de Entrada</label>
+            <input type="date" [formControl]="fechasForm.controls.fechaInicio" [min]="minDate"
+              (change)="onFechaChange()"
+              class="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
+          </div>
+
+          <!-- Fecha de Salida -->
+          <div>
+            <label class="block text-sm text-slate-300 mb-1">Fecha de Salida</label>
+            <input type="date" [formControl]="fechasForm.controls.fechaFin" [min]="minDate" (change)="onFechaChange()"
+              class="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección: Seleccionar habitaciones -->
+    <div class="surface-card rounded-2xl mb-6">
+      <div class="px-4 py-3 border-b border-slate-700">
+        <h2 class="text-lg font-medium text-white">Seleccionar habitaciones</h2>
+      </div>
+      <div class="p-4">
+
+        @if (loadingHabitaciones()) {
+        <div class="flex items-center gap-2 text-slate-300 py-4">
+          <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+          </svg>
+          <span>Buscando habitaciones disponibles...</span>
+        </div>
+        }
+
+        @if (!loadingHabitaciones() && habitacionesDisponibles().length === 0) {
+        <p class="text-slate-300 py-4">No hay habitaciones disponibles para las fechas seleccionadas.</p>
+        }
+
+        @if (!loadingHabitaciones() && habitacionesDisponibles().length > 0) {
+        <!-- Lista de habitaciones seleccionadas -->
+        @for (sel of habitacionesSeleccionadas(); track sel.index) {
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-slate-200 mb-2">
+            Habitación {{ $index + 1 }}
+          </label>
+
+          <select
+            class="w-full md:w-auto px-3 py-2 border border-slate-600 rounded-md bg-slate-900/60 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400/50 mb-2"
+            [value]="sel.habitacionId || ''" (change)="onHabitacionChange(sel.index, $event)">
+            <option value="">-- Seleccionar --</option>
+            @for (hab of getHabitacionesParaSelect(sel.index); track hab.id) {
+            <option [value]="hab.id" [selected]="hab.id === sel.habitacionId">
+              {{ hab.tipoHabitacion.nombre || 'Habitación' }} - S/ {{ hab.precio.toFixed(1) }}
+            </option>
+            }
+          </select>
+
+          @if (habitacionesSeleccionadas().length > 1) {
+          <button type="button" (click)="quitarHabitacion(sel.index)"
+            class="ml-2 px-3 py-1 bg-red-500 text-slate-900 text-sm rounded hover:bg-red-400 transition">
+            Quitar
+          </button>
+          }
+        </div>
+        }
+
+        <!-- Botón Añadir habitación -->
+        @if (getHabitacionesParaSelect(0).length > habitacionesSeleccionadas().length) {
+        <button type="button" (click)="agregarHabitacion()"
+          class="px-4 py-2 btn-outline rounded-md transition">
+          Añadir habitación
+        </button>
+        }
+
+        <!-- Desglose de precios -->
+        <div class="mt-6 pt-4 border-t border-slate-700/60 space-y-2">
+          @if (subtotalPorNoche() > 0) {
+          <div class="flex justify-between text-slate-300">
+            <span>Precio por noche:</span>
+            <span>{{ formatCurrency(subtotalPorNoche()) }}</span>
+          </div>
+          <div class="flex justify-between text-slate-300">
+            <span>Noches:</span>
+            <span>{{ noches() }}</span>
+          </div>
+          <div class="flex justify-between text-lg font-semibold text-white pt-2 border-t border-slate-700/60">
+            <span>Total:</span>
+            <span class="text-emerald-300">{{ formatCurrency(total()) }}</span>
+          </div>
+        } @else {
+          <p class="text-slate-300 text-sm">Seleccione una habitación para ver el precio</p>
+        }
+        </div>
+        }
+
+      </div>
+    </div>
+
+    <!-- Botón Reservar -->
+    <div class="text-center">
+      <button type="button" (click)="onSubmit()" [disabled]="submitting() || total() === 0"
+        class="px-8 py-3 bg-emerald-500 text-slate-900 font-semibold rounded-md hover:bg-emerald-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
+        @if (submitting()) {
+        <span class="flex items-center justify-center gap-2">
+          <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+          </svg>
+          Procesando...
+        </span>
+        } @else {
+        Reservar
+        }
+      </button>
+    </div>
+
+    <!-- Link volver -->
+    <div class="mt-8 text-center">
+      <a [routerLink]="['/home/hoteles', hotelData()?.departamento?.id]"
+        class="text-amber-200 hover:text-amber-100 transition">
+        ← Volver a hoteles
+      </a>
+    </div>
+
+    }
+
+  </div>
+</div>
