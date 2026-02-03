@@ -33,7 +33,7 @@ export class ReservaService {
   buscarPorDni(dni: string, estado?: string): Observable<ReservaListResponse[]> {
     const params: Record<string, string> = { dni };
     if (estado) {
-      params.estado = estado;
+      params['estado'] = estado;
     }
 
     return this.http

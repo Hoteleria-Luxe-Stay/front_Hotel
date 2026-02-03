@@ -51,6 +51,7 @@ export class MisReservasPageComponent implements OnInit {
 
     const fechaInicio = this.filtroFechaInicio() || undefined;
     const fechaFin = this.filtroFechaFin() || undefined;
+    const estado = this.filtroEstado() !== 'TODOS' ? this.filtroEstado() : undefined;
 
     this.reservaService.getMisReservas(fechaInicio, fechaFin, estado).subscribe({
       next: (data) => {
