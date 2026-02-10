@@ -22,6 +22,21 @@ export type AuthResponse = {
   user: UserResponse;
 }
 
+export type PasswordResetRequest = {
+  email: string | null;
+}
+
+export type PasswordResetVerifyRequest = {
+  email: string | null;
+  code: string | null;
+}
+
+export type PasswordResetConfirmRequest = {
+  email: string | null;
+  code: string | null;
+  newPassword: string | null;
+}
+
 
 
 

@@ -1,0 +1,48 @@
+<main class="min-h-screen bg-slate-900 flex items-center justify-center px-6 py-12">
+  <section class="w-full max-w-md">
+    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-8">
+      <header class="text-center mb-6">
+        <h1 class="text-2xl font-serif text-white">Verifica tu código</h1>
+        <p class="text-sm text-gray-400 mt-2">Enviamos un código a {{ email() }}</p>
+      </header>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Código de 6 dígitos</label>
+          <input
+            type="text"
+            maxlength="6"
+            formControlName="code"
+            placeholder="000000"
+            class="w-full px-4 py-3 bg-slate-700/50 border text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400/50 border-slate-600 tracking-[0.35em] text-center"
+          />
+          @if (codeField?.invalid && codeField?.touched) {
+            <p class="text-sm text-red-400 mt-2">Ingresa el código completo</p>
+          }
+        </div>
+
+        @if (hasError()) {
+          <div class="bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-2 rounded-lg text-sm">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          [disabled]="isPosting()"
+          class="w-full bg-amber-500 text-slate-900 font-semibold py-3 rounded-lg hover:bg-amber-400 transition-colors disabled:opacity-60"
+        >
+          @if (isPosting()) {
+            Verificando...
+          } @else {
+            Verificar
+          }
+        </button>
+      </form>
+
+      <div class="text-center mt-6">
+        <a routerLink="/auth/forgot-password" class="text-amber-400 text-sm hover:text-amber-300">Volver a enviar código</a>
+      </div>
+    </div>
+  </section>
+</main>

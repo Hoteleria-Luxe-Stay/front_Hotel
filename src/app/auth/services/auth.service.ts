@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../enviroments/environment';
 import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
-import { LoginRequest, RegisterRequest, AuthResponse } from '../interfaces/auth.interface';
+import { LoginRequest, RegisterRequest, AuthResponse, PasswordResetRequest, PasswordResetVerifyRequest, PasswordResetConfirmRequest } from '../interfaces/auth.interface';
 import { UserResponse } from '../interfaces/userResponse.interface';
 
 type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
@@ -170,6 +170,27 @@ export class AuthService {
   hasRole(role: string): boolean {
     const user = this._user();
     return user?.role === role;
+  }
+
+  requestPasswordReset(email: string): Observable<void> {
+    const payload: PasswordResetRequest = { email };
+    return this.http.post<void>(`${baseUrl}/auth/password/forgot`, payload).pipe(
+      catchError((error) => this.handleAuthError(error))
+    );
+  }
+
+  verifyPasswordResetCode(email: string, code: string): Observable<void> {
+    const payload: PasswordResetVerifyRequest = { email, code };
+    return this.http.post<void>(`${baseUrl}/auth/password/verify`, payload).pipe(
+      catchError((error) => this.handleAuthError(error))
+    );
+  }
+
+  resetPassword(email: string, code: string, newPassword: string): Observable<void> {
+    const payload: PasswordResetConfirmRequest = { email, code, newPassword };
+    return this.http.post<void>(`${baseUrl}/auth/password/reset`, payload).pipe(
+      catchError((error) => this.handleAuthError(error))
+    );
   }
 
   /**
