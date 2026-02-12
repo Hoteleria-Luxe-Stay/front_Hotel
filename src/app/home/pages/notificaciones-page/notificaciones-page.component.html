@@ -43,7 +43,7 @@
                 [class.text-amber-200]="!notificacion.leida"
                 [class.bg-slate-700/40]="notificacion.leida"
                 [class.text-slate-300]="notificacion.leida">
-                {{ getTipoLabel(notificacion.tipo) }}
+                {{ getEventTypeLabel(notificacion.eventType) }}
               </span>
               <span class="text-xs text-slate-400">{{ formatDate(notificacion.fechaCreacion) }}</span>
             </div>

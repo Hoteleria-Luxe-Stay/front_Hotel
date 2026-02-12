@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ReservaPublicService } from '../../services/reserva-public.service';
+import { NotificacionService } from '../../../services/notificacion.service';
 import { ReservaResponse } from '../../../interfaces';
 import jsPDF from 'jspdf';
 
@@ -15,6 +16,7 @@ import jsPDF from 'jspdf';
 export class ConfirmacionPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private reservaService = inject(ReservaPublicService);
+  private notificacionService = inject(NotificacionService);
 
   reservaId = signal<number | null>(null);
   reserva = signal<ReservaResponse | null>(null);
@@ -37,6 +39,8 @@ export class ConfirmacionPageComponent implements OnInit {
       next: (data) => {
         this.reserva.set(data);
         this.loading.set(false);
+        // Actualizar contador de notificaciones después de confirmar reserva
+        this.notificacionService.actualizarContadorNoLeidas();
       },
       error: (err) => {
         console.error('Error cargando reserva:', err);
