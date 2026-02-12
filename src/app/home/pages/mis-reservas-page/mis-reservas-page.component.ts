@@ -4,6 +4,7 @@ import { environment } from '../../../enviroments/environment';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { ReservaPublicService } from '../../services/reserva-public.service';
+import { NotificacionService } from '../../../services/notificacion.service';
 import { MisReservasItem } from '../../../interfaces';
 import { HttpClient } from '@angular/common/http';
 
@@ -16,6 +17,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class MisReservasPageComponent implements OnInit {
   private reservaService = inject(ReservaPublicService);
+  private notificacionService = inject(NotificacionService);
   private http = inject(HttpClient);
   private router = inject(Router);
 
@@ -142,6 +144,8 @@ export class MisReservasPageComponent implements OnInit {
         this.successMessage.set(`Reserva #${reserva.id} cancelada exitosamente`);
         // Recargar lista
         this.cargarReservas();
+        // Actualizar contador de notificaciones
+        this.notificacionService.actualizarContadorNoLeidas();
         // Limpiar mensaje después de 3 segundos
         setTimeout(() => this.successMessage.set(null), 3000);
       },

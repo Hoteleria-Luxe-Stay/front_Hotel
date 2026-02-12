@@ -72,11 +72,12 @@ export class NotificacionesPageComponent {
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleString('es-PE', {
-      day: '2-digit',
+      day: 'numeric',
       month: 'short',
       year: 'numeric',
-      hour: '2-digit',
+      hour: 'numeric',
       minute: '2-digit',
+      hour12: true,
     });
   }
 
@@ -90,6 +91,23 @@ export class NotificacionesPageComponent {
         return 'Push';
       default:
         return tipo;
+    }
+  }
+
+  getEventTypeLabel(eventType?: string): string {
+    if (!eventType) return 'Notificación';
+
+    switch (eventType) {
+      case 'CONFIRMED':
+        return 'Reserva confirmada';
+      case 'CANCELLED_ADMIN':
+        return 'Reserva cancelada por el administrador';
+      case 'LOGIN':
+        return 'Inicio de sesión';
+      case 'REGISTRO':
+        return 'Registro exitoso';
+      default:
+        return eventType;
     }
   }
 }
