@@ -72,11 +72,12 @@ export class NotificacionesPageComponent {
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleString('es-PE', {
-      day: '2-digit',
+      day: 'numeric',
       month: 'short',
       year: 'numeric',
-      hour: '2-digit',
+      hour: 'numeric',
       minute: '2-digit',
+      hour12: true,
     });
   }
 
