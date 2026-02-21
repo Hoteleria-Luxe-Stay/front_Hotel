@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hotel-frontend
+    ports:
+      - "4200:80"
+    environment:
+      - API_URL=http://api-gateway:8080
+    depends_on:
+      - api-gateway
+    networks:
+      - hotel-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Si necesitas proxy al API Gateway
+  # api-gateway:
+  #  image: api-gateway:latest
+  #  container_name: api-gateway
+  #  ports:
+  #    - "8080:8080"
+  #  networks:
+  #    - hotel-network
+
+networks:
+  hotel-network:
+    external: bridge
