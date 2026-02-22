@@ -137,7 +137,7 @@ export class MisReservasPageComponent implements OnInit {
 
     this.procesando.set(true);
 
-    this.http.delete(`${environment.apiUrl}/api/v1/reservas/${reserva.id}/cancelar`).subscribe({
+    this.http.post(`${environment.apiUrl}/api/v1/reservas/${reserva.id}/cancelar`, {}).subscribe({
       next: () => {
         this.procesando.set(false);
         this.cerrarModalEliminar();
