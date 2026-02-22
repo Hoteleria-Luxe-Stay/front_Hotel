@@ -38,6 +38,22 @@ h1, h2, h3, .font-serif {
   background: var(--bg-admin);
 }
 
+/* Improve contrast for admin forms rendered over white cards */
+.admin-shell .bg-white input,
+.admin-shell .bg-white select,
+.admin-shell .bg-white textarea {
+  color: #334155;
+}
+
+.admin-shell .bg-white input::placeholder,
+.admin-shell .bg-white textarea::placeholder {
+  color: #94a3b8;
+}
+
+.admin-shell .bg-white option {
+  color: #334155;
+}
+
 .surface-card {
   background: var(--surface);
   border: 1px solid var(--border-soft);

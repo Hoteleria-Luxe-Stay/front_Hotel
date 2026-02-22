@@ -18,6 +18,8 @@ export class ResetPasswordPageComponent {
   isPosting = signal(false);
   hasError = signal(false);
   errorMessage = signal('');
+  showPassword = signal(false);
+  showConfirmPassword = signal(false);
   email = signal('');
   code = signal('');
 
@@ -37,6 +39,14 @@ export class ResetPasswordPageComponent {
 
   get confirmPasswordField() {
     return this.form.get('confirmPassword');
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword.update((value) => !value);
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword.update((value) => !value);
   }
 
   onSubmit() {

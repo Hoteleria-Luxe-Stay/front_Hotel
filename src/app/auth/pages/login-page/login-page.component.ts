@@ -14,6 +14,7 @@ export class LoginPageComponent {
   hasError = signal(false);
   isPosting = signal(false);
   errorMessage = signal('');
+  showPassword = signal(false);
 
   router = inject(Router);
 
@@ -29,6 +30,10 @@ export class LoginPageComponent {
 
   get passwordField() {
     return this.loginForm.get('password');
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword.update((value) => !value);
   }
 
   authService = inject(AuthService);

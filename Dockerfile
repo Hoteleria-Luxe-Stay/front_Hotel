@@ -9,6 +9,8 @@ RUN npm run build -- --configuration=production
 # Stage 2: Nginx
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/nginx.conf
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 COPY --from=builder /app/dist/dawi_frontend/browser /usr/share/nginx/html
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

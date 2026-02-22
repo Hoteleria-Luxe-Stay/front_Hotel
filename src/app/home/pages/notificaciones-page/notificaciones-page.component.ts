@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NotificacionService } from '../../../services/notificacion.service';
 import { NotificacionUsuarioResponse } from '../../../interfaces';
 
@@ -13,58 +13,87 @@ import { NotificacionUsuarioResponse } from '../../../interfaces';
 })
 export class NotificacionesPageComponent {
   private notificacionService = inject(NotificacionService);
+  private route = inject(ActivatedRoute);
 
   notificaciones = signal<NotificacionUsuarioResponse[]>([]);
   loading = signal<boolean>(true);
+  eliminando = signal<boolean>(false);
   error = signal<string | null>(null);
-  filtroLeidas = signal<'todas' | 'leidas' | 'no-leidas'>('todas');
+  tabActivo = signal<'reservas' | 'sesiones'>('reservas');
+
+  reservasNoLeidas = this.notificacionService.notificacionesReservasNoLeidas;
+  sesionesNoLeidas = this.notificacionService.notificacionesSesionesNoLeidas;
+
+  notificacionesReservas = computed(() =>
+    this.notificaciones().filter(n => this.isReservaEvent((n.eventType || '').toUpperCase()))
+  );
+
+  notificacionesSesiones = computed(() =>
+    this.notificaciones().filter(n => this.isSessionEvent((n.eventType || '').toUpperCase()))
+  );
+
+  notificacionesActuales = computed(() =>
+    this.tabActivo() === 'reservas' ? this.notificacionesReservas() : this.notificacionesSesiones()
+  );
+
+  noLeidasActuales = computed(() =>
+    this.notificacionesActuales().filter(n => !n.leida).length
+  );
 
   constructor() {
+    this.route.queryParamMap.subscribe((params) => {
+      const origen = params.get('origen');
+      this.tabActivo.set(origen === 'sesiones' ? 'sesiones' : 'reservas');
+    });
     this.cargarNotificaciones();
   }
 
   cargarNotificaciones(): void {
     this.loading.set(true);
     this.error.set(null);
-
-    const filtro = this.filtroLeidas();
-    const leida = filtro === 'todas' ? undefined : filtro === 'leidas';
-
-    this.notificacionService.getMisNotificaciones(leida).subscribe({
+    this.notificacionService.getMisNotificaciones().subscribe({
       next: (data) => {
         this.notificaciones.set(data);
+        this.notificacionService.actualizarContadorNoLeidas();
         this.loading.set(false);
       },
-      error: (err) => {
-        console.error('Error cargando notificaciones:', err);
-        this.error.set('No se pudieron cargar tus notificaciones');
+      error: () => {
+        this.error.set('No se pudieron cargar las notificaciones.');
         this.loading.set(false);
       },
     });
   }
 
-  onFiltroChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.filtroLeidas.set(select.value as 'todas' | 'leidas' | 'no-leidas');
-    this.cargarNotificaciones();
+  cambiarTab(tab: 'reservas' | 'sesiones'): void {
+    this.tabActivo.set(tab);
+    this.error.set(null);
   }
 
   marcarComoLeida(id: number): void {
     this.notificacionService.marcarComoLeida(id).subscribe({
       next: () => this.cargarNotificaciones(),
-      error: (err) => {
-        console.error('Error marcando notificacion:', err);
-        this.error.set('No se pudo marcar la notificación');
-      },
+      error: () => this.error.set('No se pudo marcar la notificación como leída.'),
     });
   }
 
   marcarTodasComoLeidas(): void {
     this.notificacionService.marcarTodasComoLeidas().subscribe({
       next: () => this.cargarNotificaciones(),
-      error: (err) => {
-        console.error('Error marcando todas:', err);
-        this.error.set('No se pudieron marcar todas las notificaciones');
+      error: () => this.error.set('No se pudieron marcar todas las notificaciones.'),
+    });
+  }
+
+  eliminarTab(): void {
+    this.eliminando.set(true);
+    this.error.set(null);
+    this.notificacionService.eliminarNotificacionesPorOrigen(this.tabActivo()).subscribe({
+      next: () => {
+        this.eliminando.set(false);
+        this.cargarNotificaciones();
+      },
+      error: () => {
+        this.error.set('No se pudieron eliminar las notificaciones.');
+        this.eliminando.set(false);
       },
     });
   }
@@ -81,33 +110,41 @@ export class NotificacionesPageComponent {
     });
   }
 
-  getTipoLabel(tipo: string): string {
-    switch (tipo) {
-      case 'EMAIL':
-        return 'Email';
-      case 'SMS':
-        return 'SMS';
-      case 'PUSH':
-        return 'Push';
-      default:
-        return tipo;
+  getEventTypeLabel(eventType?: string): string {
+    if (!eventType) return 'Notificación';
+    switch (eventType.toUpperCase()) {
+      case 'CONFIRMED':       return 'Confirmada';
+      case 'PENDING':
+      case 'CREATED':         return 'Pendiente';
+      case 'CANCELLED_ADMIN': return 'Cancelada por admin';
+      case 'CANCELLED':       return 'Cancelada';
+      case 'LOGIN':           return 'Inicio de sesión';
+      default:                return eventType;
     }
   }
 
-  getEventTypeLabel(eventType?: string): string {
-    if (!eventType) return 'Notificación';
-
-    switch (eventType) {
-      case 'CONFIRMED':
-        return 'Reserva confirmada';
+  getEventTypeBadgeClass(eventType?: string): string {
+    switch ((eventType || '').toUpperCase()) {
+      case 'CONFIRMED':       return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+      case 'PENDING':
+      case 'CREATED':         return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
       case 'CANCELLED_ADMIN':
-        return 'Reserva cancelada por el administrador';
-      case 'LOGIN':
-        return 'Inicio de sesión';
-      case 'REGISTRO':
-        return 'Registro exitoso';
-      default:
-        return eventType;
+      case 'CANCELLED':       return 'bg-red-500/20 text-red-300 border-red-500/30';
+      case 'LOGIN':           return 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+      default:                return 'bg-slate-700/40 text-slate-300 border-slate-600/30';
     }
+  }
+
+  private isSessionEvent(eventType: string): boolean {
+    return eventType === 'LOGIN';
+  }
+
+  private isReservaEvent(eventType: string): boolean {
+    if (!eventType) return false;
+    const reservaEvents = new Set([
+      'CONFIRMED', 'PENDING', 'CREATED', 'CANCELLED', 'CANCELLED_ADMIN',
+      'RESERVA_CONFIRMADA', 'RESERVA_PENDIENTE', 'RESERVA_CANCELADA'
+    ]);
+    return reservaEvents.has(eventType) || eventType.includes('RESERVA');
   }
 }

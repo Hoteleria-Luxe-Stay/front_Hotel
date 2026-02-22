@@ -56,19 +56,162 @@
       </a>
 
       <!-- Notificaciones -->
-      <a routerLink="/home/notificaciones" routerLinkActive="bg-white/10"
-        class="relative flex items-center gap-2 px-4 py-2 text-gray-300 rounded-lg hover:bg-white/10 hover:text-white transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z" />
-        </svg>
-        Notificaciones
-        @if (notificacionesNoLeidas() > 0) {
-        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-          {{ notificacionesNoLeidas() > 9 ? '9+' : notificacionesNoLeidas() }}
-        </span>
+      <div class="relative">
+        <button
+          type="button"
+          (click)="toggleNotificationsMenu()"
+          class="relative flex items-center gap-2 px-4 py-2 text-gray-300 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
+          [class.bg-white/10]="notificationsMenuOpen()"
+          [attr.aria-expanded]="notificationsMenuOpen()"
+          aria-haspopup="menu"
+          aria-label="Abrir menú de notificaciones"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z" />
+          </svg>
+          Notificaciones
+          <svg
+            class="w-4 h-4 transition-transform"
+            [class.rotate-180]="notificationsMenuOpen()"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+          @if (notificacionesNoLeidas() > 0) {
+          <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-5 px-1 flex items-center justify-center">
+            {{ notificacionesNoLeidas() }}
+          </span>
+          }
+        </button>
+
+        @if (notificationsMenuOpen()) {
+        <div
+          class="absolute right-0 mt-2 w-72 rounded-2xl border border-slate-700/60 bg-slate-900 shadow-2xl z-50 overflow-hidden"
+          role="menu"
+        >
+          <!-- Header -->
+          <div class="flex items-center justify-between px-4 py-3 border-b border-slate-700/50">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z" />
+              </svg>
+              <span class="text-sm font-semibold text-white">Notificaciones</span>
+            </div>
+            @if (notificacionesNoLeidas() > 0) {
+            <span class="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/25 font-medium">
+              {{ notificacionesNoLeidas() }} sin leer
+            </span>
+            }
+          </div>
+
+          <!-- Cards -->
+          <div class="p-3 space-y-2">
+
+            <!-- Reservas -->
+            <div class="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/15">
+              <div class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-slate-200">Reservas</p>
+                <p class="text-xs text-slate-500">Confirmaciones y cancelaciones</p>
+              </div>
+              @if (notificacionesReservasNoLeidas() > 0) {
+              <span class="text-xs px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold flex-shrink-0">
+                {{ notificacionesReservasNoLeidas() }}
+              </span>
+              }
+              <a
+                routerLink="/home/notificaciones"
+                [queryParams]="{ origen: 'reservas' }"
+                (click)="onNotificationsItemClick()"
+                class="flex-shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-colors"
+                title="Ver reservas"
+                role="menuitem"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+              <button
+                (click)="eliminarReservas()"
+                class="flex-shrink-0 p-1.5 rounded-lg text-slate-500 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                title="Eliminar notificaciones de reservas"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Sesiones -->
+            <div class="flex items-center gap-2.5 p-3 rounded-xl bg-sky-500/5 border border-sky-500/15">
+              <div class="w-9 h-9 rounded-lg bg-sky-500/15 border border-sky-500/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 8h2a2 2 0 012 2v9a2 2 0 01-2 2h-2M15 3H6a2 2 0 00-2 2v14a2 2 0 002 2h9a2 2 0 002-2V5a2 2 0 00-2-2zm-3 9h.01M9 12h.01" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-slate-200">Sesiones</p>
+                <p class="text-xs text-slate-500">Historial de inicios de sesión</p>
+              </div>
+              @if (notificacionesSesionesNoLeidas() > 0) {
+              <span class="text-xs px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-semibold flex-shrink-0">
+                {{ notificacionesSesionesNoLeidas() }}
+              </span>
+              }
+              <a
+                routerLink="/home/notificaciones"
+                [queryParams]="{ origen: 'sesiones' }"
+                (click)="onNotificationsItemClick()"
+                class="flex-shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-sky-300 hover:bg-sky-500/10 transition-colors"
+                title="Ver sesiones"
+                role="menuitem"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+              <button
+                (click)="eliminarSesiones()"
+                class="flex-shrink-0 p-1.5 rounded-lg text-slate-500 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                title="Eliminar notificaciones de sesiones"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <div class="border-t border-slate-700/50">
+            <a
+              routerLink="/home/notificaciones"
+              (click)="onNotificationsItemClick()"
+              class="flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs text-slate-400 hover:text-amber-300 transition-colors"
+              role="menuitem"
+            >
+              Ver todas las notificaciones
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </div>
         }
-      </a>
+      </div>
 
       <!-- Badge con nombre del usuario -->
       <div class="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-400/50 rounded-full">
@@ -155,19 +298,116 @@
         </svg>
         Mis Reservas
       </a>
-      <a routerLink="/home/notificaciones" (click)="toggleMobileMenu()"
-        class="relative flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg hover:bg-slate-700 hover:text-white">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z" />
-        </svg>
-        Notificaciones
-        @if (notificacionesNoLeidas() > 0) {
-        <span class="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center ml-auto">
-          {{ notificacionesNoLeidas() > 9 ? '9+' : notificacionesNoLeidas() }}
-        </span>
+      <div class="rounded-lg overflow-hidden">
+        <button
+          type="button"
+          (click)="toggleNotificationsMenu()"
+          class="relative w-full flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg hover:bg-slate-700 hover:text-white"
+          [class.bg-slate-700]="notificationsMenuOpen()"
+          [attr.aria-expanded]="notificationsMenuOpen()"
+          aria-haspopup="menu"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z" />
+          </svg>
+          Notificaciones
+          @if (notificacionesNoLeidas() > 0) {
+          <span class="bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-5 px-1 flex items-center justify-center ml-auto">
+            {{ notificacionesNoLeidas() }}
+          </span>
+          }
+          <svg
+            class="w-4 h-4 ml-1 transition-transform"
+            [class.rotate-180]="notificationsMenuOpen()"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        @if (notificationsMenuOpen()) {
+        <div class="ml-4 mt-2 space-y-2 pl-4 border-l-2 border-slate-700/50">
+
+          <!-- Reservas (mobile) -->
+          <div class="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/15">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <span class="text-sm text-slate-200 flex-1">Reservas</span>
+            @if (notificacionesReservasNoLeidas() > 0) {
+            <span class="text-xs px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold">
+              {{ notificacionesReservasNoLeidas() }}
+            </span>
+            }
+            <a
+              routerLink="/home/notificaciones"
+              [queryParams]="{ origen: 'reservas' }"
+              (click)="onNotificationsItemClick()"
+              class="p-1.5 rounded-lg text-slate-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-colors"
+              title="Ver reservas"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+            <button
+              (click)="eliminarReservas()"
+              class="p-1.5 rounded-lg text-slate-500 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+              title="Eliminar notificaciones de reservas"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Sesiones (mobile) -->
+          <div class="flex items-center gap-2 p-3 rounded-xl bg-sky-500/5 border border-sky-500/15">
+            <div class="w-8 h-8 rounded-lg bg-sky-500/15 flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 8h2a2 2 0 012 2v9a2 2 0 01-2 2h-2M15 3H6a2 2 0 00-2 2v14a2 2 0 002 2h9a2 2 0 002-2V5a2 2 0 00-2-2zm-3 9h.01M9 12h.01" />
+              </svg>
+            </div>
+            <span class="text-sm text-slate-200 flex-1">Sesiones</span>
+            @if (notificacionesSesionesNoLeidas() > 0) {
+            <span class="text-xs px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-semibold">
+              {{ notificacionesSesionesNoLeidas() }}
+            </span>
+            }
+            <a
+              routerLink="/home/notificaciones"
+              [queryParams]="{ origen: 'sesiones' }"
+              (click)="onNotificationsItemClick()"
+              class="p-1.5 rounded-lg text-slate-400 hover:text-sky-300 hover:bg-sky-500/10 transition-colors"
+              title="Ver sesiones"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+            <button
+              (click)="eliminarSesiones()"
+              class="p-1.5 rounded-lg text-slate-500 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+              title="Eliminar notificaciones de sesiones"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+
+        </div>
         }
-      </a>
+      </div>
       <div class="border-t border-slate-700 pt-3 mt-3">
         <div class="flex items-center gap-2 px-4 py-2">
           <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

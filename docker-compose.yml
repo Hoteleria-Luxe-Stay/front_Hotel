@@ -8,10 +8,6 @@ services:
     container_name: hotel-frontend
     ports:
       - "4200:80"
-    environment:
-      - API_URL=http://api-gateway:8080
-    depends_on:
-      - api-gateway
     networks:
       - hotel-network
     healthcheck:
@@ -21,15 +17,7 @@ services:
       retries: 3
     restart: unless-stopped
 
-  # Si necesitas proxy al API Gateway
-  # api-gateway:
-  #  image: api-gateway:latest
-  #  container_name: api-gateway
-  #  ports:
-  #    - "8080:8080"
-  #  networks:
-  #    - hotel-network
-
 networks:
   hotel-network:
-    external: bridge
+    external: true
+    name: hotel-network
