@@ -123,12 +123,29 @@ export class ReservaPublicService {
     );
   }
 
-  confirmarPago(reservaId: number): Observable<any> {
-    return this.http.post(`${baseUrl}/reservas/${reservaId}/confirmar-pago`, {}).pipe(
-      catchError((error: any) => {
-        console.error('Error al confirmar pago:', error);
-        return throwError(() => error);
-      })
-    );
+  iniciarPago(
+    reservaId: number,
+    successUrl?: string,
+    cancelUrl?: string
+  ): Observable<IniciarPagoResponse> {
+    const idempotencyKey = crypto.randomUUID();
+    const headers = { 'Idempotency-Key': idempotencyKey };
+    const body = successUrl || cancelUrl ? { successUrl, cancelUrl } : {};
+    return this.http
+      .post<IniciarPagoResponse>(`${baseUrl}/reservas/${reservaId}/iniciar-pago`, body, { headers })
+      .pipe(
+        catchError((error: any) => {
+          console.error('Error al iniciar pago:', error);
+          return throwError(() => error);
+        })
+      );
   }
+}
+
+export interface IniciarPagoResponse {
+  reservaId: number;
+  pagoId: number;
+  checkoutUrl: string;
+  gatewayPaymentId: string;
+  estado: string;
 }

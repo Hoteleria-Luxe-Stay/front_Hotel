@@ -1,6 +1,5 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReservaPublicService } from '../../services/reserva-public.service';
 import { ReservaResponse } from '../../../interfaces';
@@ -8,11 +7,10 @@ import { ReservaResponse } from '../../../interfaces';
 @Component({
   standalone: true,
   selector: 'app-pago-page',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './pago-page.component.html',
 })
 export class PagoPageComponent implements OnInit {
-  private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private reservaService = inject(ReservaPublicService);
@@ -23,21 +21,7 @@ export class PagoPageComponent implements OnInit {
   procesando = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
 
-  // Formulario de pago
-  pagoForm = this.fb.group({
-    numeroTarjeta: ['', [Validators.required, Validators.pattern(/^\d{16}$/)]],
-    nombreTitular: ['', [Validators.required, Validators.minLength(3)]],
-    fechaExpiracion: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]],
-    cvv: ['', [Validators.required, Validators.pattern(/^\d{3,4}$/)]],
-    tipoPago: ['tarjeta', Validators.required],
-  });
-
-  // Computed para el total
-  total = computed(() => {
-    const res = this.reserva();
-    if (!res) return 0;
-    return res.total;
-  });
+  total = computed(() => this.reserva()?.total ?? 0);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('reservaId');
@@ -64,78 +48,35 @@ export class PagoPageComponent implements OnInit {
     });
   }
 
-  formatCardNumber(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\D/g, '');
-    if (value.length > 16) value = value.slice(0, 16);
-    input.value = value;
-    this.pagoForm.get('numeroTarjeta')?.setValue(value);
-  }
-
-  formatExpiration(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\D/g, '');
-    if (value.length > 4) value = value.slice(0, 4);
-    if (value.length >= 2) {
-      value = value.slice(0, 2) + '/' + value.slice(2);
-    }
-    input.value = value;
-    this.pagoForm.get('fechaExpiracion')?.setValue(value);
-  }
-
-  procesarPago(): void {
-    if (this.pagoForm.invalid) {
-      this.pagoForm.markAllAsTouched();
-      this.errorMessage.set('Complete todos los datos de pago correctamente');
+  pagarConMercadoPago(): void {
+    const reservaId = this.reservaId();
+    if (!reservaId) {
+      this.errorMessage.set('ID de reserva no válido');
       return;
     }
 
     this.procesando.set(true);
     this.errorMessage.set(null);
 
-    const reservaId = this.reservaId();
-    if (!reservaId) {
-      this.errorMessage.set('ID de reserva no válido');
-      this.procesando.set(false);
-      return;
-    }
+    const origin = window.location.origin;
+    const successUrl = `${origin}/home/reserva/${reservaId}/confirmacion`;
+    const cancelUrl = `${origin}/home/reserva/${reservaId}/pago`;
 
-    // Confirmar el pago en el backend
-    this.reservaService.confirmarPago(reservaId).subscribe({
-      next: () => {
-        // Pago exitoso - redirigir a confirmación
-        this.router.navigate(['/home/reserva', reservaId, 'confirmacion']);
+    this.reservaService.iniciarPago(reservaId, successUrl, cancelUrl).subscribe({
+      next: (resp) => {
+        window.location.href = resp.checkoutUrl;
       },
       error: (err) => {
-        console.error('Error al confirmar pago:', err);
+        console.error('Error al iniciar pago:', err);
         this.procesando.set(false);
-        this.errorMessage.set(err.error?.message || 'Error al procesar el pago. Intente nuevamente.');
-      }
+        this.errorMessage.set(
+          err.error?.message || 'Error al iniciar el pago. Intente nuevamente.'
+        );
+      },
     });
   }
 
   formatCurrency(amount: number): string {
     return `S/ ${amount.toFixed(2)}`;
-  }
-
-  // Getters para validaciones
-  get numeroTarjetaInvalid(): boolean {
-    const control = this.pagoForm.get('numeroTarjeta');
-    return !!(control?.invalid && control?.touched);
-  }
-
-  get nombreTitularInvalid(): boolean {
-    const control = this.pagoForm.get('nombreTitular');
-    return !!(control?.invalid && control?.touched);
-  }
-
-  get fechaExpiracionInvalid(): boolean {
-    const control = this.pagoForm.get('fechaExpiracion');
-    return !!(control?.invalid && control?.touched);
-  }
-
-  get cvvInvalid(): boolean {
-    const control = this.pagoForm.get('cvv');
-    return !!(control?.invalid && control?.touched);
   }
 }
